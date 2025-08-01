@@ -2,44 +2,97 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>中秋餐會查詢</title>
+  <title>中秋餐會查詢系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      padding: 16px;
+      max-width: 600px;
+      margin: auto;
+      font-size: 18px;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 1.8em;
+    }
+
+    label, input, button {
+      display: block;
+      width: 100%;
+      margin: 15px 0;
+      font-size: 1.4em;
+      padding: 10px;
+    }
+
+    input {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+
+    .entry {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
   <h2>中秋餐會報名查詢</h2>
-  <label for="empId">請輸入工號：</label>
-  <input type="text" id="empId">
+  <label for="empId">請輸入您的工號：</label>
+  <input type="text" id="empId" placeholder="例如：10250201">
   <button onclick="search()">查詢</button>
-  <div id="result" style="margin-top:20px;"></div>
+
+  <div id="result"></div>
 
   <script>
-    const apiUrl = "https://script.google.com/macros/s/AKfycbxY8PTSjQ46AY0LavL3VaPmPZKeivRRlbFdeeLaKTZuhO9nWLGu7C7wmO-m0MPYRT0W/exec";
+    const apiUrl = "https://script.google.com/macros/s/你的API網址/exec";
 
     function search() {
       const empId = document.getElementById("empId").value.trim();
       const resultBox = document.getElementById("result");
+
       if (!empId) {
         resultBox.innerHTML = "<p style='color:red;'>請輸入工號</p>";
         return;
       }
 
-      fetch(`${apiUrl}?id=${empId}`)
+      fetch(`${apiUrl}?id=${encodeURIComponent(empId)}`)
         .then(res => res.json())
         .then(data => {
-          if (data.error) {
-            resultBox.innerHTML = "<p style='color:red;'>查無資料</p>";
+          if (data.count > 0) {
+            resultBox.innerHTML = data.data.map(d => `
+              <div class="entry">
+                <p><strong>時間：</strong>${d.時間}</p>
+                <p><strong>是否參加：</strong>${d.是否參加}</p>
+                <p><strong>單位：</strong>${d.單位}</p>
+                <p><strong>工號：</strong>${d.工號}</p>
+                <p><strong>姓名：</strong>${d.姓名}</p>
+                <p><strong>是否吃素：</strong>${d.是否吃素}</p>
+              </div>
+            `).join("");
           } else {
-            resultBox.innerHTML = `
-              <p><strong>時間：</strong>${data.時間}</p>
-              <p><strong>是否參加：</strong>${data.是否參加}</p>
-              <p><strong>單位：</strong>${data.單位}</p>
-              <p><strong>工號：</strong>${data.工號}</p>
-              <p><strong>姓名：</strong>${data.姓名}</p>
-              <p><strong>是否吃素：</strong>${data.是否吃素}</p>
-            `;
+            resultBox.innerHTML = "<p style='color:red;'>查無資料</p>";
           }
         })
         .catch(err => {
-          resultBox.innerHTML = "<p style='color:red;'>查詢失敗，請稍後再試</p>";
+          console.error(err);
+          resultBox.innerHTML = "<p style='color:red;'>查詢失敗，請稍後再試。</p>";
         });
     }
   </script>

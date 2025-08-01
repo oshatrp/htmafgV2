@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>中秋餐會查詢</title>
+</head>
+<body>
+  <h2>中秋餐會報名查詢</h2>
+  <label for="empId">請輸入工號：</label>
+  <input type="text" id="empId">
+  <button onclick="search()">查詢</button>
+  <div id="result" style="margin-top:20px;"></div>
+
+  <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbxY8PTSjQ46AY0LavL3VaPmPZKeivRRlbFdeeLaKTZuhO9nWLGu7C7wmO-m0MPYRT0W/exec";
+
+    function search() {
+      const empId = document.getElementById("empId").value.trim();
+      const resultBox = document.getElementById("result");
+      if (!empId) {
+        resultBox.innerHTML = "<p style='color:red;'>請輸入工號</p>";
+        return;
+      }
+
+      fetch(`${apiUrl}?id=${empId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            resultBox.innerHTML = "<p style='color:red;'>查無資料</p>";
+          } else {
+            resultBox.innerHTML = `
+              <p><strong>時間：</strong>${data.時間}</p>
+              <p><strong>是否參加：</strong>${data.是否參加}</p>
+              <p><strong>單位：</strong>${data.單位}</p>
+              <p><strong>工號：</strong>${data.工號}</p>
+              <p><strong>姓名：</strong>${data.姓名}</p>
+              <p><strong>是否吃素：</strong>${data.是否吃素}</p>
+            `;
+          }
+        })
+        .catch(err => {
+          resultBox.innerHTML = "<p style='color:red;'>查詢失敗，請稍後再試</p>";
+        });
+    }
+  </script>
+</body>
+</html>
